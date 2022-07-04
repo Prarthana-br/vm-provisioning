@@ -27,6 +27,7 @@ public class UserEntity {
 
     @OneToMany(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name="name")
     private List<VMEntity> vms;
 
     public List<VMEntity> getVms() {

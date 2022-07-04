@@ -10,6 +10,7 @@ import com.ripple.vmprovisioning.mappers.VMEntityToVMMapper;
 import com.ripple.vmprovisioning.mappers.VMToVMEntityMapper;
 import com.ripple.vmprovisioning.model.User;
 import com.ripple.vmprovisioning.model.VirtualMachine;
+import com.ripple.vmprovisioning.service.exceptions.DuplicateUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,12 +54,16 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
         if (existingUser == null) {
             return userEntityToUserMapper.map(userEntityRepository.save(userToUserEntityMapper.map(user)));
         }
-        return null;
+        throw new DuplicateUserException("User already exists");
     }
 
     @Override
     public User signIn(User user) {
-        return userEntityToUserMapper.map(userEntityRepository.findByName(user.getName()));
+        User userDetails = userEntityToUserMapper.map(userEntityRepository.findByName(user.getName()));
+        if(userDetails != null){
+            return userDetails;
+        }
+        throw new DuplicateUserException("User details not found");
     }
 
     @Override
@@ -71,6 +76,13 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
     public Collection<VirtualMachine> getVirtualMachines(Optional<User> user, Optional<Integer> limit) {
 
         if(user != null && user.isPresent() && limit != null && limit.isPresent()){
+            Collection<VirtualMachine> virtualMachines = null;
+            UserEntity userDetails = userEntityRepository.findByName(user.get().getName());
+            if (userDetails != null) {
+                Page<VMEntity>  vmEntitiesPage =  vmEntityRepository.findAllByUserId(String.valueOf(userDetails.getUserId()), PageRequest.of(0, limit.get(), Sort.by("hardDisk").descending()));
+                virtualMachines = getVirtualMachines(virtualMachines, userDetails, vmEntitiesPage);
+                return virtualMachines;
+            }
 
         } else if (user != null && user.isPresent()) {
             //Query By User
@@ -91,16 +103,21 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
         } else if (limit != null && limit.isPresent()) {
             Collection<VirtualMachine> virtualMachines = null;
             Page<VMEntity>  vmEntitiesPage =  vmEntityRepository.findAll(PageRequest.of(0, limit.get(), Sort.by("hardDisk").descending()));
-            if(vmEntitiesPage != null && !vmEntitiesPage.isEmpty()){
-                virtualMachines = new ArrayList<>();
-                List<VMEntity> vmEntityList = vmEntitiesPage.getContent();
-                for (VMEntity vmEntity : vmEntityList) {
-                    virtualMachines.add(vmEntityToVMMapper.map(vmEntity, null));
-                }
-            }
+            virtualMachines = getVirtualMachines(virtualMachines, null, vmEntitiesPage);
             return virtualMachines;
         }
         return null;
+    }
+
+    private Collection<VirtualMachine> getVirtualMachines(Collection<VirtualMachine> virtualMachines, UserEntity userDetails, Page<VMEntity> vmEntitiesPage) {
+        if(vmEntitiesPage != null && !vmEntitiesPage.isEmpty()){
+            virtualMachines = new ArrayList<>();
+            List<VMEntity> vmEntityList = vmEntitiesPage.getContent();
+            for (VMEntity vmEntity : vmEntityList) {
+                virtualMachines.add(vmEntityToVMMapper.map(vmEntity, userEntityToUserMapper.map(userDetails)));
+            }
+        }
+        return virtualMachines;
     }
 
     @Override

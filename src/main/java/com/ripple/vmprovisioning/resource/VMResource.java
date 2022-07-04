@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -26,8 +27,11 @@ public class VMResource {
     }
 
     @GetMapping
+    @RequestMapping("/{name}")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<VirtualMachine> getVirtualMachineDetailsByUser(@RequestBody User user){
+    public Collection<VirtualMachine> getVirtualMachineDetailsByUser(@PathVariable String name){
+        User user = new User();
+        user.setName(name);
         return vmProvisioningService.getVirtualMachines(Optional.of(user), null);
     }
 
@@ -38,4 +42,13 @@ public class VMResource {
         return vmProvisioningService.getVirtualMachines(null, Optional.of(limit));
     }
 
+    @GetMapping
+    @RequestMapping("/loggedInUser/{limit}")
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<VirtualMachine> getVirtualMachineDetailsByLoggedInUser(@RequestHeader("name") String name, @PathVariable Integer limit){
+
+        User user = new User();
+        user.setName(name);
+        return vmProvisioningService.getVirtualMachines(Optional.of(user), Optional.of(limit));
+    }
 }
