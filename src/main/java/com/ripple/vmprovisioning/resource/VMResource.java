@@ -4,6 +4,7 @@ import com.ripple.vmprovisioning.model.User;
 import com.ripple.vmprovisioning.model.VirtualMachine;
 import com.ripple.vmprovisioning.service.VMProvisioningService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -27,20 +28,23 @@ public class VMResource {
     }
 
     @GetMapping
-    @RequestMapping("/{name}")
+    @RequestMapping("/{targetUserName}")
+    @PreAuthorize("T(com.ripple.vmprovisioning.security.NameCheckUtil).isTargetNameSameAsLoggedInUser(#loggedInUserName, #targetUserName) or hasAuthority('Master')")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<VirtualMachine> getVirtualMachineDetailsByUser(@PathVariable String name){
+    public Collection<VirtualMachine> getVirtualMachineDetailsByUser(@PathVariable String targetUserName, @RequestHeader("name") String loggedInUserName){
         User user = new User();
-        user.setName(name);
+        user.setName(targetUserName);
         return vmProvisioningService.getVirtualMachines(Optional.of(user), null);
     }
 
     @GetMapping
-    @RequestMapping("/memory/{limit}")
+    @RequestMapping("/all/{limit}")
+    @PreAuthorize("hasAuthority('Master')")
     @ResponseStatus(HttpStatus.OK)
     public Collection<VirtualMachine> getVirtualMachineDetailsByMemory(@PathVariable Integer limit){
         return vmProvisioningService.getVirtualMachines(null, Optional.of(limit));
     }
+
 
     @GetMapping
     @RequestMapping("/loggedInUser/{limit}")
