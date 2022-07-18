@@ -19,7 +19,10 @@ public class VMEntity {
     @Column(name = "cpu_cores")
     private String cpuCores;
     @Column(name = "user_id")
-    private String userId;
+    private Integer userId;
+
+//    @ManyToOne
+//    private UserEntity user;
 
     public Long getVmId() {
         return vmId;
@@ -61,11 +64,11 @@ public class VMEntity {
         this.cpuCores = cpuCores;
     }
 
-    public String getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 }

@@ -1,5 +1,6 @@
 package com.ripple.vmprovisioning.integration.db.entity;
 
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -24,19 +25,6 @@ public class UserEntity {
     private String role;
     @Column(name = "password")
     private String password;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name="name")
-    private List<VMEntity> vms;
-
-    public List<VMEntity> getVms() {
-        return vms;
-    }
-
-    public void setVms(List<VMEntity> vms) {
-        this.vms = vms;
-    }
 
     public Long getUserId() {
         return userId;

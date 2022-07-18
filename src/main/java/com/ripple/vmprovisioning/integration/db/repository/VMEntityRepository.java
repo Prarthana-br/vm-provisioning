@@ -9,7 +9,8 @@ import java.util.Collection;
 
 public interface VMEntityRepository extends JpaRepository<VMEntity, Long> {
 
-    Collection<VMEntity> findByUserId(String userId);
+    Collection<VMEntity> findByUserId(Integer userId);
     Page<VMEntity> findAll(Pageable pageable);
-    Page<VMEntity> findAllByUserId(String userId, Pageable pageable);
+    Page<VMEntity> findAllByUserId(Integer userId, Pageable pageable);
+    void deleteByUserId(Integer userId);
 }

@@ -11,6 +11,7 @@ import com.ripple.vmprovisioning.mappers.VMToVMEntityMapper;
 import com.ripple.vmprovisioning.model.User;
 import com.ripple.vmprovisioning.model.VirtualMachine;
 import com.ripple.vmprovisioning.service.exceptions.DuplicateUserException;
+import com.ripple.vmprovisioning.service.exceptions.VMException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -63,7 +64,8 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
         if(userDetails != null){
             return userDetails;
         }
-        throw new DuplicateUserException("User details not found");
+//        throw new DuplicateUserException("User details not found");
+        return null;
     }
 
     @Override
@@ -79,7 +81,7 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
             Collection<VirtualMachine> virtualMachines = null;
             UserEntity userDetails = userEntityRepository.findByName(user.get().getName());
             if (userDetails != null) {
-                Page<VMEntity>  vmEntitiesPage =  vmEntityRepository.findAllByUserId(String.valueOf(userDetails.getUserId()), PageRequest.of(0, limit.get(), Sort.by("hardDisk").descending()));
+                Page<VMEntity>  vmEntitiesPage =  vmEntityRepository.findAllByUserId(Math.toIntExact(userDetails.getUserId()), PageRequest.of(0, limit.get(), Sort.by("hardDisk").descending()));
                 virtualMachines = getVirtualMachines(virtualMachines, userDetails, vmEntitiesPage);
                 return virtualMachines;
             }
@@ -89,16 +91,16 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
             Collection<VirtualMachine> virtualMachines = null;
             UserEntity userDetails = userEntityRepository.findByName(user.get().getName());
             if (userDetails != null) {
-                Collection<VMEntity> vmEntities = vmEntityRepository.findByUserId(String.valueOf(userDetails.getUserId()));
+                Collection<VMEntity> vmEntities = vmEntityRepository.findByUserId(Math.toIntExact(userDetails.getUserId()));
                 if (!CollectionUtils.isEmpty(vmEntities)) {
                     virtualMachines = new ArrayList<>();
                     for (VMEntity vmEntity : vmEntities) {
                         virtualMachines.add(vmEntityToVMMapper.map(vmEntity, null));
 
                     }
+                    return virtualMachines;
                 }
             }
-            return virtualMachines;
 
         } else if (limit != null && limit.isPresent()) {
             Collection<VirtualMachine> virtualMachines = null;
@@ -106,7 +108,7 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
             virtualMachines = getVirtualMachines(virtualMachines, null, vmEntitiesPage);
             return virtualMachines;
         }
-        return null;
+        throw new VMException("VM details not found for the given criteria");
     }
 
     private Collection<VirtualMachine> getVirtualMachines(Collection<VirtualMachine> virtualMachines, UserEntity userDetails, Page<VMEntity> vmEntitiesPage) {
@@ -116,12 +118,14 @@ public class VMProvisioningServiceImpl implements VMProvisioningService {
             for (VMEntity vmEntity : vmEntityList) {
                 virtualMachines.add(vmEntityToVMMapper.map(vmEntity, userEntityToUserMapper.map(userDetails)));
             }
+            return virtualMachines;
         }
-        return virtualMachines;
+        throw new VMException("VM details not found for the given criteria");
     }
 
     @Override
-    public User deleteUserAccount(User user) {
-        return null;
+    public void deleteUserAccount(User user) {
+        vmEntityRepository.deleteByUserId(Integer.parseInt(""+user.getUserId()));
+        userEntityRepository.deleteById(user.getUserId());
     }
 }

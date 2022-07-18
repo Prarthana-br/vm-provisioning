@@ -4,6 +4,7 @@ import com.ripple.vmprovisioning.integration.db.repository.UserEntityRepository;
 import com.ripple.vmprovisioning.mappers.UserEntityToUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,6 +33,5 @@ public class VMProvisioningUserDetailsService implements UserDetailsService {
         ArrayList<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         grantedAuthorities.add(grantedAuthority);
         return new User(user.getName(), new String(user.getPassword()), grantedAuthorities);
-        //return new User("foo", "foo", new ArrayList<>());
     }
 }

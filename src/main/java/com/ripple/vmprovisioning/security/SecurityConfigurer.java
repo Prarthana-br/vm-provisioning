@@ -12,9 +12,6 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.servlet.Filter;
-
-
 @EnableWebSecurity
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
@@ -31,7 +28,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable().
-                authorizeRequests().antMatchers("/authenticate").
+                authorizeRequests().antMatchers("/authenticate","/v1/user/signUp").
                 permitAll().
                 anyRequest().authenticated().
                 and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

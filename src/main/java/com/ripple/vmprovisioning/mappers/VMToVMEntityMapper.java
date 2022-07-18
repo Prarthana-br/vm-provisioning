@@ -19,7 +19,7 @@ public class VMToVMEntityMapper implements VMMapper<VirtualMachine, User, VMEnti
         vmEntity.setOs(virtualMachine.getOs());
         vmEntity.setRam(virtualMachine.getRam());
         if(user != null){
-            vmEntity.setUserId(String.valueOf(user.getUserId()));
+            vmEntity.setUserId(Math.toIntExact(user.getUserId()));
         }
         return vmEntity;
     }

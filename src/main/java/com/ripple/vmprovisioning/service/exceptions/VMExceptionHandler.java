@@ -13,12 +13,20 @@ import java.util.Map;
 public class VMExceptionHandler {
 
     @ExceptionHandler(value = DuplicateUserException.class)
-    public ResponseEntity<Map<String, String>> handle(RestException t){
+    public ResponseEntity<Map<String, String>> handleUserException(RestException t){
 
         LinkedHashMap<String, String> errorMap = new LinkedHashMap<>();
         errorMap.put("HTTP_STATUS_CODE", String.valueOf(t.getHttpStatusCode()));
         errorMap.put("ERROR_MESSAGE", t.getMessage());
+        return new ResponseEntity<>(errorMap, HttpStatus.valueOf(t.getHttpStatusCode()));
+    }
 
+    @ExceptionHandler(value = VMException.class)
+    public ResponseEntity<Map<String, String>> handleVMException(RestException t){
+
+        LinkedHashMap<String, String> errorMap = new LinkedHashMap<>();
+        errorMap.put("HTTP_STATUS_CODE", String.valueOf(t.getHttpStatusCode()));
+        errorMap.put("ERROR_MESSAGE", t.getMessage());
         return new ResponseEntity<>(errorMap, HttpStatus.valueOf(t.getHttpStatusCode()));
     }
 }

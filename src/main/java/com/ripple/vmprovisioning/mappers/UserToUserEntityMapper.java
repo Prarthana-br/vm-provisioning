@@ -13,7 +13,9 @@ public class UserToUserEntityMapper implements UserMapper<User, UserEntity> {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(user.getEmail());
         userEntity.setMobile(user.getMobile());
-        userEntity.setPassword(new String(user.getPassword()));
+        if(user.getPassword() != null){
+            userEntity.setPassword(new String(user.getPassword()));
+        }
         userEntity.setName(user.getName());
         userEntity.setRole(user.getRole());
         return userEntity;
